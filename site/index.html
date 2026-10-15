@@ -14,7 +14,25 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-3WXQ6M4ZFX"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+      const ownerTrackingKey = 'portfolio_owner';
+      const ownerTrackingParam = new URLSearchParams(window.location.search).get('owner');
+      if (ownerTrackingParam === '1') localStorage.setItem(ownerTrackingKey, '1');
+      if (ownerTrackingParam === '0') localStorage.removeItem(ownerTrackingKey);
+      const isOwnerTraffic = localStorage.getItem(ownerTrackingKey) === '1';
+
+      function gtag(){
+        const args = Array.from(arguments);
+        if (isOwnerTraffic && args[0] === 'config') {
+          const ownerLocation = new URL(window.location.href);
+          ownerLocation.search = '';
+          ownerLocation.searchParams.set('r', 'SELF');
+          args[2] = { ...(args[2] || {}), page_location: ownerLocation.toString() };
+        }
+        if (isOwnerTraffic && args[0] === 'event') {
+          args[2] = { ...(args[2] || {}), portfolio_ref: 'SELF' };
+        }
+        dataLayer.push(args);
+      }
       gtag('js', new Date());
       gtag('config', 'G-3WXQ6M4ZFX');
     </script>
